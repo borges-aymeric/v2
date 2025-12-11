@@ -263,6 +263,44 @@
 
     }
 
+    /* Optimisations mobile pour les chiffres clés */
+    @media (max-width: 768px) {
+        #key-figures {
+            padding-right: 1rem;
+        }
+        
+        #key-figures .max-w-xl {
+            max-width: 280px;
+            width: auto;
+        }
+        
+        .figure-card {
+            padding: 16px;
+            border-radius: 16px;
+        }
+        
+        .figure-title {
+            font-size: 0.7rem;
+            margin-bottom: 1rem;
+        }
+        
+        .figure-card .text-4xl {
+            font-size: 1.5rem;
+        }
+        
+        .figure-card .text-3xl {
+            font-size: 1.25rem;
+        }
+        
+        .figure-card .text-sm {
+            font-size: 0.7rem;
+        }
+        
+        #key-figures .grid {
+            gap: 0.75rem;
+        }
+    }
+
   </style>
 
 </head>
@@ -359,9 +397,9 @@
 
 
 
-      <section id="key-figures" class="fixed top-0 left-0 w-full h-full pointer-events-none z-30 flex flex-col justify-center items-end pr-6 md:pr-16">
+      <section id="key-figures" class="fixed top-0 left-0 w-full h-full pointer-events-none z-30 flex flex-col justify-center items-end pr-3 md:pr-16">
 
-          <div class="max-w-xl w-full text-right">
+          <div class="max-w-xl w-auto text-right">
 
               <span class="figure-title opacity-0 translate-x-10 text-[#B48A3C] font-bold tracking-widest text-sm uppercase mb-6 block">Notre Impact</span>
 
