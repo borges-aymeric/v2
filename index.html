@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AB Odyssée - Agence Communication Digitale</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+  
+  <style>
+    html, body {
+        margin: 0; padding: 0; width: 100%;
+        font-family: 'Inter', sans-serif;
+        background-color: #091A30;
+        color: white;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    canvas.webgl {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 0; outline: none;
+        pointer-events: auto; touch-action: none;
+    }
+
+    header {
+        position: fixed; width: 100%; z-index: 50;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+        transform: translateY(0);
+    }
+    
+    header.nav-hidden { transform: translateY(-100%); }
+    header nav { pointer-events: auto; }
+    
+    header.scrolled {
+        background: rgba(9, 26, 48, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    section.hero {
+        height: 100vh; width: 100%;
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center; text-align: center;
+        position: relative; z-index: 10; padding: 0 20px;
+        pointer-events: none;
+    }
+    .hero-content { pointer-events: auto; }
+
+    .scroll-spacer {
+        height: 1200vh; 
+        width: 100%;
+        position: relative;
+        z-index: 1; 
+        pointer-events: none;
+    }
+
+    .content-section {
+        position: relative; z-index: 20; 
+        background-color: transparent;
+        padding-top: 100px;
+    }
+    
+    .content-bg-start {
+        background: linear-gradient(to bottom, rgba(9,26,48,0) 0%, #091A30 40%);
+    }
+
+    .bg-dark-alt { background-color: #050F1A; }
+
+    .app-section {
+        background: linear-gradient(180deg, #091A30 0%, #020617 100%);
+        overflow: hidden; position: relative; z-index: 20;
+        padding-top: 4rem; padding-bottom: 4rem;
+    }
+    .phones-mask {
+        mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    }
+    .scrolling-column { display: flex; flex-direction: column; gap: 2rem; }
+    .scroll-up { animation: scrollUp 25s linear infinite; }
+    .scroll-down { animation: scrollDown 25s linear infinite; }
+    @keyframes scrollUp { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+    @keyframes scrollDown { 0% { transform: translateY(-50%); } 100% { transform: translateY(0); } }
+
+    .phone-mockup { width: 100%; background: #0f172a; border: 1px solid #1e293b; border-radius: 20px; padding: 15px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+    .mockup-header { height: 20px; width: 40%; background: #334155; border-radius: 10px; margin-bottom: 15px; }
+    .mockup-chart { height: 80px; background: linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); border-radius: 10px; margin-bottom: 10px; }
+    .mockup-row { height: 10px; background: #1e293b; border-radius: 5px; margin-bottom: 8px; width: 100%; }
+    .mockup-row.short { width: 60%; }
+    .mockup-btn { height: 30px; background: #B48A3C; border-radius: 8px; margin-top: 15px; width: 100%; opacity: 0.8; }
+
+    footer { position: relative; z-index: 20; background-color: #050F1A; border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .scroll-indicator {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); opacity: 0.8;
+        font-size: 0.8rem; color: #B48A3C; animation: bounce 2s infinite; z-index: 15;
+        transition: opacity 0.3s; pointer-events: none;
+    }
+    @keyframes bounce { 0% {transform: translate(-50%, 0);} 50% {transform: translate(-50%, -10px);} 100% {transform: translate(-50%, 0);} }
+    .value-card:hover { transform: translateY(-5px); }
+    .value-card { transition: all 0.3s ease; }
+    
+    #key-figures {
+        opacity: 0;
+        visibility: hidden;
+    }
+    #key-figures .grid {
+        pointer-events: auto;
+    }
+    .figure-card { 
+        opacity: 0; 
+        transform: translateX(50px);
+        background: rgba(255, 255, 255, 0.05); 
+        backdrop-filter: blur(25px) saturate(180%);
+        -webkit-backdrop-filter: blur(25px) saturate(180%);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        padding: 24px;
+        transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+        position: relative;
+        cursor: none;
+        overflow: hidden;
+        pointer-events: auto;
+        --x: 50%;
+        --y: 50%;
+    }
+    
+    .figure-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle 120px at var(--x) var(--y),
+            rgba(255, 255, 255, 0.08) 0%,
+            transparent 60%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        border-radius: 24px;
+    }
+    
+    .figure-card:hover::before {
+        opacity: 1;
+    }
+    
+    .figure-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle 80px at var(--x) var(--y),
+            rgba(255, 255, 255, 0.12) 0%,
+            transparent 50%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        border-radius: 24px;
+    }
+    
+    .figure-card:hover::after {
+        opacity: 1;
+    }
+    
+    .figure-card:hover {
+        transform: translateY(-5px) translateX(0) !important;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(180, 138, 60, 0.4);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3),
+                    0 0 60px rgba(180, 138, 60, 0.1);
+    }
+    
+    .figure-card > * {
+        position: relative;
+        z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="main-header" class="top-0 left-0 right-0">
+    <nav class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center justify-between h-24">
+        <a href="#hero" class="flex items-center gap-3 group">
+          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/690e092a150929816e34c705/79e4f2ccc_image.png" alt="Logo AB Odyssée" class="h-12 w-auto rounded-md transition-transform duration-300 group-hover:scale-105"/>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#hero" class="text-sm font-medium text-white hover:text-[#B48A3C] transition-colors">Accueil</a>
+          <a href="#hero" class="text-sm font-medium text-white hover:text-[#B48A3C] transition-colors">Services</a>
+          <a href="#adn" class="text-sm font-medium text-white hover:text-[#B48A3C] transition-colors">À propos</a>
+          <a href="#contact" class="px-6 py-2 rounded-md text-sm font-bold bg-[#B48A3C] text-white hover:bg-[#906e30] transition-colors">
+            Démarrer l'Odyssée
+          </a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <canvas class="webgl"></canvas>
+
+  <main>
+      <section id="hero" class="hero">
+          <div class="hero-content opacity-0 translate-y-10" id="hero-text">
+              <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full mb-6 text-white/90 text-sm border border-white/10">
+                <i data-lucide="sparkles" class="w-4 h-4 text-[#B48A3C]"></i>
+                <span>Agence de communication digitale</span>
+              </div>
+              <h1 class="text-5xl md:text-7xl text-white mb-6 leading-tight font-bold">
+                La visibilité attire,<br />
+                <span class="text-[#B48A3C]">l'inoubliable fidélise.</span>
+              </h1>
+              <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto font-light">
+                Cliquez sur une carte pour explorer le service.
+              </p>
+          </div>
+      </section>
+
+      <div class="scroll-indicator">
+        <p class="uppercase tracking-widest text-xs mb-2">Explorer</p>
+        <i data-lucide="arrow-down" class="w-6 h-6 mx-auto"></i>
+      </div>
+
+      <div class="scroll-spacer"></div>
+
+      <!-- Sentinel element for IntersectionObserver -->
+      <div id="key-figures-sentinel" style="position: absolute; top: 1200px; left: 0; width: 100%; height: 40vh; pointer-events: none; z-index: 1;"></div>
+
+      <section id="key-figures" class="fixed top-0 left-0 w-full h-full pointer-events-none z-30 flex flex-col justify-center items-end pr-6 md:pr-16">
+          <div class="max-w-xl w-full text-right">
+              <span class="figure-title opacity-0 translate-x-10 text-[#B48A3C] font-bold tracking-widest text-sm uppercase mb-6 block">Notre Impact</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="figure-card">
+                      <div class="text-4xl font-bold text-white mb-2">2024</div>
+                      <div class="text-gray-400 text-sm font-medium uppercase tracking-wide">Année de création</div>
+                  </div>
+                  <div class="figure-card">
+                      <div class="text-4xl font-bold text-[#38BDF8] mb-2">100 %</div>
+                      <div class="text-gray-400 text-sm font-medium uppercase tracking-wide">Clients satisfaits</div>
+                  </div>
+                  <div class="figure-card">
+                      <div class="text-3xl font-bold text-white mb-2">Sur mesure</div>
+                      <div class="text-gray-400 text-sm font-medium uppercase tracking-wide">Approche unique</div>
+                  </div>
+                  <div class="figure-card">
+                      <div class="text-3xl font-bold text-white mb-2">France</div>
+                      <div class="text-gray-400 text-sm font-medium uppercase tracking-wide">Intervention nationale</div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <div id="service-1" class="absolute" style="margin-top: -100px;"></div>
+      
+      <section id="adn" class="content-section py-24 content-bg-start">
+        <div id="service-2" class="absolute top-0"></div>
+        <div id="service-3" class="absolute top-1/2"></div>
+        <div id="service-4" class="absolute bottom-0"></div>
+
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 relative">
+            <div class="text-center mb-48">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full mb-4 text-[#B48A3C] text-sm font-medium border border-[#B48A3C]/20">
+                    <i data-lucide="compass" class="w-4 h-4"></i><span>Notre ADN</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Au cœur de notre odyssée</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Jouez avec nos piliers ci-dessus.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="value-card text-center p-6 rounded-2xl bg-[#050F1A]/80 border border-white/5 backdrop-blur-sm">
+                    <div class="w-20 h-20 mx-auto bg-[#B48A3C]/10 rounded-full flex items-center justify-center mb-6 text-[#B48A3C]"><i data-lucide="target" class="w-10 h-10"></i></div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Excellence</h3>
+                    <p class="text-gray-400">Nous visons la perfection pixel par pixel.</p>
+                </div>
+                <div class="value-card text-center p-6 rounded-2xl bg-[#050F1A]/80 border border-white/5 backdrop-blur-sm">
+                    <div class="w-20 h-20 mx-auto bg-[#B48A3C]/10 rounded-full flex items-center justify-center mb-6 text-[#B48A3C]"><i data-lucide="compass" class="w-10 h-10"></i></div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Accompagnement</h3>
+                    <p class="text-gray-400">Copilote de votre aventure digitale.</p>
+                </div>
+                <div class="value-card text-center p-6 rounded-2xl bg-[#050F1A]/80 border border-white/5 backdrop-blur-sm">
+                    <div class="w-20 h-20 mx-auto bg-[#B48A3C]/10 rounded-full flex items-center justify-center mb-6 text-[#B48A3C]"><i data-lucide="zap" class="w-10 h-10"></i></div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Innovation</h3>
+                    <p class="text-gray-400">Toujours une longueur d'avance.</p>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      <section class="content-section py-24 bg-dark-alt">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-12">Ce que disent nos clients</h2>
+            <div class="grid md:grid-cols-3 gap-8 text-left">
+                <div class="bg-[#091A30] p-8 rounded-2xl border border-white/5">
+                    <div class="flex text-[#B48A3C] mb-4">★★★★★</div>
+                    <p class="text-gray-300 mb-6">"AB Odyssée a transformé notre présence en ligne."</p>
+                    <div><strong class="block text-white">Sophie Martin</strong><span class="text-sm text-gray-500">Boutique Le Jardin</span></div>
+                </div>
+                <div class="bg-[#091A30] p-8 rounded-2xl border border-white/5">
+                    <div class="flex text-[#B48A3C] mb-4">★★★★★</div>
+                    <p class="text-gray-300 mb-6">"Une refonte de notre identité réussie."</p>
+                    <div><strong class="block text-white">Alexandre Dubois</strong><span class="text-sm text-gray-500">Dubois & Associés</span></div>
+                </div>
+                <div class="bg-[#091A30] p-8 rounded-2xl border border-white/5">
+                    <div class="flex text-[#B48A3C] mb-4">★★★★★</div>
+                    <p class="text-gray-300 mb-6">"Un partenaire fiable et réactif."</p>
+                    <div><strong class="block text-white">Claire Delaunay</strong><span class="text-sm text-gray-500">Nova Industrie</span></div>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      <section class="app-section">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-left">
+                    <span class="text-[#38BDF8] font-bold tracking-widest text-sm uppercase mb-2 block">Mobile App</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Pilotez tout depuis votre smartphone</h2>
+                    <p class="text-gray-400 text-lg mb-8 leading-relaxed">Suivez vos performances où que vous soyez.</p>
+                    <div class="flex gap-4">
+                        <button class="bg-white/10 hover:bg-white/20 transition px-6 py-3 rounded-xl flex items-center gap-3 border border-white/10">
+                            <i data-lucide="play" class="fill-white w-6 h-6"></i>
+                            <div class="text-left"><span class="block text-xs text-gray-400">GET IT ON</span><span class="block text-sm font-bold text-white">Google Play</span></div>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative h-[500px] overflow-hidden phones-mask">
+                    <div class="grid grid-cols-2 gap-6 h-full">
+                        <div class="scrolling-column scroll-up">
+                            <div class="phone-mockup"><div class="mockup-header"></div><div class="mockup-chart"></div><div class="mockup-row"></div><div class="mockup-row short"></div></div>
+                            <div class="phone-mockup" style="height: 180px;"><div class="mockup-header"></div><div class="mockup-row"></div><div class="mockup-row"></div><div class="mockup-btn"></div></div>
+                        </div>
+                        <div class="scrolling-column scroll-down">
+                            <div class="phone-mockup" style="height: 200px; border-color: #38BDF8;"><div class="mockup-header" style="background:#38BDF8;"></div><div class="mockup-chart"></div></div>
+                            <div class="phone-mockup"><div class="mockup-header"></div><div class="mockup-row"></div><div class="mockup-row"></div><div class="mockup-row short"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </section>
+  </main>
+
+  <footer id="contact">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div class="md:col-span-2">
+          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/690e092a150929816e34c705/79e4f2ccc_image.png" alt="AB Odyssée" class="h-12 w-auto mb-4 rounded"/>
+          <p class="text-gray-400 text-sm max-w-md leading-relaxed">Nous accompagnons les TPE et PME dans leur développement en ligne.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-4 text-[#B48A3C]">Contact</h3>
+          <ul class="space-y-3 text-sm text-gray-400">
+            <li class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> contact@abodyssee.fr</li>
+            <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> France</li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/10 pt-8 flex justify-between items-center">
+        <p class="text-sm text-gray-500">© 2024 AB Odyssée.</p>
+        <p class="text-sm text-[#B48A3C]">La visibilité attire, l'inoubliable fidélise.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+    window.addEventListener('load', () => {
+        const heroText = document.getElementById('hero-text');
+        if(heroText) {
+            heroText.style.transition = 'all 1s ease-out';
+            heroText.style.opacity = '1';
+            heroText.style.transform = 'translateY(0)';
+        }
+    });
+
+    // Spotlight effect for figure cards
+    document.addEventListener('DOMContentLoaded', () => {
+        const figureCards = document.querySelectorAll('.figure-card');
+        
+        figureCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.setProperty('--x', `${x}px`);
+                card.style.setProperty('--y', `${y}px`);
+            });
+
+            card.addEventListener('mouseleave', () => {
+                // Reset to center when leaving
+                card.style.setProperty('--x', '50%');
+                card.style.setProperty('--y', '50%');
+            });
+        });
+    });
+
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('main-header');
+        const indicator = document.querySelector('.scroll-indicator');
+        const currentScroll = window.scrollY;
+
+        if (currentScroll > lastScrollTop && currentScroll > 100) {
+            header.classList.add('nav-hidden');
+        } else {
+            header.classList.remove('nav-hidden');
+        }
+        lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; 
+
+        if (currentScroll > 50) {
+            header.classList.add('scrolled');
+            if(indicator) indicator.style.opacity = '0';
+        } else {
+            header.classList.remove('scrolled');
+            if(indicator) indicator.style.opacity = '0.8';
+        }
+    });
+  </script>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+    try {
+        const canvas = document.querySelector('canvas.webgl');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#091A30'); 
+        scene.fog = new THREE.Fog('#091A30', 10, 50);
+
+        const sizes = { width: window.innerWidth, height: window.innerHeight };
+        const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
+        camera.position.z = 19; 
+        scene.add(camera);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(sizes.width, sizes.height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        let hoveredMesh = null;
+        
+        let isDragging = false;
+        let previousPointer = { x: 0, y: 0 };
+        let draggedMesh = null;
+
+        const sceneGroup = new THREE.Group();
+        const initialYPosition = -12; 
+        sceneGroup.position.set(0, initialYPosition, 0); 
+        scene.add(sceneGroup);
+
+        const sphereRadius = 5.5;
+
+        const depthSphereMaterial = new THREE.MeshBasicMaterial({
+            color: 0x000000, transparent: true, opacity: 0,
+            depthWrite: true, depthTest: true, colorWrite: false 
+        });
+        const depthSphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
+        const depthSphere = new THREE.Mesh(depthSphereGeo, depthSphereMaterial);
+        depthSphere.renderOrder = 0; 
+        depthSphere.position.z = -5; 
+        sceneGroup.add(depthSphere);
+
+        const particlesCount = 20000;
+        const particlesGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount; i++) {
+            const x = Math.random() * 2 - 1;
+            const y = Math.random() * 2 - 1;
+            const z = Math.random() * 2 - 1;
+            const vector = new THREE.Vector3(x, y, z).normalize().multiplyScalar(sphereRadius);
+            positions[i * 3] = vector.x;
+            positions[i * 3 + 1] = vector.y;
+            positions[i * 3 + 2] = vector.z;
+        }
+
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particlesMat = new THREE.PointsMaterial({
+            color: 0x38bdf8, size: 0.04, transparent: true, opacity: 0.8,
+            depthTest: true, depthWrite: false 
+        });
+
+        const centerSphere = new THREE.Points(particlesGeo, particlesMat);
+        centerSphere.renderOrder = 1; 
+        sceneGroup.add(centerSphere);
+
+        function createCardTexture(symbol, name, subtitle, colorCode) {
+            const ctxCanvas = document.createElement('canvas');
+            ctxCanvas.width = 600; ctxCanvas.height = 360;
+            const ctx = ctxCanvas.getContext('2d');
+            const grd = ctx.createLinearGradient(0, 0, 600, 360);
+            grd.addColorStop(0, '#132845'); grd.addColorStop(1, '#050F1A');
+            ctx.fillStyle = grd; ctx.fillRect(0, 0, 600, 360);
+            ctx.fillStyle = colorCode; ctx.fillRect(0, 0, 25, 360);
+            ctx.fillStyle = colorCode; ctx.font = 'bold 200px Inter, sans-serif';
+            ctx.textAlign = 'right'; ctx.globalAlpha = 0.15; 
+            ctx.fillText(symbol, 580, 280); ctx.globalAlpha = 1.0;
+            ctx.font = 'bold 90px Inter, sans-serif'; ctx.textAlign = 'right';
+            ctx.fillStyle = colorCode; ctx.shadowColor = colorCode; ctx.shadowBlur = 15;
+            ctx.fillText(symbol, 560, 100); ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 45px Inter, sans-serif';
+            ctx.textAlign = 'left'; ctx.fillText(name, 60, 80);
+            ctx.fillStyle = '#cbd5e1'; ctx.font = '24px Inter, sans-serif';
+            ctx.fillText(subtitle, 60, 300);
+            const texture = new THREE.CanvasTexture(ctxCanvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            return texture;
+        }
+
+        const servicesData = [
+            { symbol: '01', name: 'Sites Web', subtitle: 'Vitrines & E-commerce', color: '#FCD34D', link: '#service-1' }, 
+            { symbol: '02', name: 'Identité', subtitle: 'Logo & Branding', color: '#A855F7', link: '#service-2' }, 
+            { symbol: '03', name: 'Stratégie', subtitle: 'Réseaux & Contenu', color: '#38BDF8', link: '#service-3' }, 
+            { symbol: '04', name: 'Diagnostic', subtitle: 'Audit de performance', color: '#FB923C', link: '#service-4' } 
+        ];
+
+        const cardMeshes = [];
+        const boxGeo = new THREE.BoxGeometry(9, 5.5, 0.2); 
+        const cardBaseScale = 0.8; 
+        const cardHoverScale = 0.9; 
+
+        servicesData.forEach((data, i) => {
+            const texture = createCardTexture(data.symbol, data.name, data.subtitle, data.color);
+            const mat = new THREE.MeshStandardMaterial({ 
+                map: texture, roughness: 0.2, metalness: 0.1,
+                emissive: new THREE.Color(0x000000), 
+                transparent: true, opacity: 0,
+                depthTest: true, depthWrite: false, side: THREE.DoubleSide
+            });
+            const mesh = new THREE.Mesh(boxGeo, mat);
+            mesh.userData = { link: data.link, isCard: true };
+            mesh.renderOrder = 2; 
+            sceneGroup.add(mesh);
+            cardMeshes.push(mesh);
+        });
+
+        const pillarsYPosition = -55; 
+
+        const travelerGeo = new THREE.SphereGeometry(0.4, 32, 32);
+        const posAttribute = travelerGeo.attributes.position;
+        const vertex = new THREE.Vector3();
+        for (let i = 0; i < posAttribute.count; i++) {
+            vertex.fromBufferAttribute(posAttribute, i);
+            if (vertex.y > 0) {
+                vertex.y = vertex.y * 1.6; 
+                const pinch = 1 - vertex.y * 0.4; 
+                vertex.x = vertex.x * pinch;
+                vertex.z = vertex.z * pinch;
+            }
+            posAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+        }
+        travelerGeo.computeVertexNormals();
+
+        const travelerMat = new THREE.MeshBasicMaterial({ color: 0x00FFFF, transparent: true, opacity: 1 }); 
+        const traveler = new THREE.Mesh(travelerGeo, travelerMat);
+        traveler.visible = false;
+        
+        const travelerLight = new THREE.PointLight(0x00FFFF, 30, 15);
+        traveler.add(travelerLight);
+        sceneGroup.add(traveler);
+
+        const trailLength = 8;
+        const trailSpheres = [];
+        const trailHistory = [];
+        const trailGeo = travelerGeo.clone();
+        trailGeo.scale(0.5, 0.5, 0.5);
+
+        for (let i = 0; i < trailLength; i++) {
+            const mat = new THREE.MeshBasicMaterial({
+                color: 0x00FFFF, transparent: true, opacity: 0.6 - (i * 0.07) 
+            });
+            const mesh = new THREE.Mesh(trailGeo, mat);
+            mesh.visible = false;
+            sceneGroup.add(mesh);
+            trailSpheres.push(mesh);
+            trailHistory.push(new THREE.Vector3(0, initialYPosition, 0));
+        }
+
+        const splitterGroup = new THREE.Group();
+        sceneGroup.add(splitterGroup);
+        const splitters = [];
+        const pillarTargetsX = [-6, 0, 6]; 
+
+        for(let i=0; i<3; i++) {
+             const mat = travelerMat.clone(); 
+             const mesh = new THREE.Mesh(travelerGeo, mat); 
+             mesh.scale.setScalar(0.6); 
+             mesh.visible = false;
+             splitterGroup.add(mesh);
+             splitters.push(mesh);
+        }
+
+        const pillarsGroup = new THREE.Group();
+        pillarsGroup.position.set(0, pillarsYPosition, 0);
+        sceneGroup.add(pillarsGroup);
+
+        const pillarMeshes = [];
+        const pillarGeo = new THREE.IcosahedronGeometry(2.5, 1);
+        const pillarColors = [0xFCD34D, 0x38BDF8, 0xA855F7]; 
+        const pillarPositions = [-6, 0, 6]; 
+
+        pillarPositions.forEach((xPos, index) => {
+            const mat = new THREE.MeshBasicMaterial({ 
+                color: pillarColors[index], wireframe: true, transparent: true, opacity: 0.6
+            });
+            const mesh = new THREE.Mesh(pillarGeo, mat);
+            mesh.position.set(xPos, 0, 0);
+            mesh.scale.set(0, 0, 0); 
+            mesh.userData = { isPillar: true, originalScale: 1 };
+            
+            const coreGeo = new THREE.IcosahedronGeometry(1.5, 0);
+            const coreMat = new THREE.MeshBasicMaterial({ color: pillarColors[index], transparent: true, opacity: 0.1 });
+            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            mesh.add(coreMesh);
+
+            pillarsGroup.add(mesh);
+            pillarMeshes.push(mesh);
+        });
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const mainSpot = new THREE.SpotLight(0x38bdf8, 200);
+        mainSpot.position.set(0, 10, 25);
+        scene.add(mainSpot);
+        const sideLight = new THREE.PointLight(0xB48A3C, 100);
+        sideLight.position.set(15, -5, 5);
+        scene.add(sideLight);
+
+        window.addEventListener('mousemove', (event) => {
+            pointer.x = (event.clientX / sizes.width) * 2 - 1;
+            pointer.y = -(event.clientY / sizes.height) * 2 + 1;
+            
+            if (isDragging && draggedMesh) {
+                const deltaX = event.clientX - previousPointer.x;
+                const deltaY = event.clientY - previousPointer.y;
+                draggedMesh.rotation.y += deltaX * 0.01;
+                draggedMesh.rotation.x += deltaY * 0.01;
+                previousPointer = { x: event.clientX, y: event.clientY };
+            }
+        });
+
+        window.addEventListener('mousedown', (event) => {
+            if (hoveredMesh && hoveredMesh.userData.isPillar) {
+                isDragging = true;
+                draggedMesh = hoveredMesh;
+                previousPointer = { x: event.clientX, y: event.clientY };
+                document.body.style.cursor = 'grabbing';
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggedMesh = null;
+            if (hoveredMesh) document.body.style.cursor = 'pointer';
+            else document.body.style.cursor = 'default';
+        });
+
+        window.addEventListener('click', () => {
+            if (hoveredMesh && hoveredMesh.userData.isCard) {
+                const targetId = hoveredMesh.userData.link;
+                const element = document.querySelector(targetId);
+                if (element) element.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        let targetScrollY = window.scrollY;
+        let currentScrollY = window.scrollY;
+        const scrollHeightFactor = 550; 
+        const clock = new THREE.Clock();
+
+        window.addEventListener('scroll', () => { targetScrollY = window.scrollY; });
+
+        const radius = 9; 
+        const verticalGap = 5.0; 
+        const angleSpeed = 1.1; 
+        const inertiaFactor = 0.05; 
+
+        // --- TIMELINE ---
+        const STAGE_FIGURES_END = 1500;     
+        const OFFSET_CARDS = 2000;          
+        
+        const SCROLL_STAGE_CARDS_END = 4200 + OFFSET_CARDS; 
+        const SCROLL_STAGE_TRAVEL_START = 4400 + OFFSET_CARDS; 
+        const SCROLL_STAGE_TRAVEL_END = 5600 + OFFSET_CARDS; 
+        const SCROLL_STAGE_PILLARS_REVEAL = 5800 + OFFSET_CARDS; 
+
+        const keyFiguresSection = document.getElementById('key-figures');
+        let figuresAnimated = false;
+        
+        // IntersectionObserver pour gérer la visibilité des cartes Impact
+        const keyFiguresSentinel = document.getElementById('key-figures-sentinel');
+        let isFiguresVisible = false;
+        
+        const figuresObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const shouldBeVisible = entry.isIntersecting && entry.intersectionRatio >= 0.3;
+                
+                if (shouldBeVisible && !isFiguresVisible) {
+                    // Entrée : afficher les cartes
+                    isFiguresVisible = true;
+                    figuresAnimated = true;
+                    keyFiguresSection.style.visibility = 'visible';
+                    keyFiguresSection.style.pointerEvents = 'auto';
+                    gsap.to(keyFiguresSection, { opacity: 1, duration: 0.3, ease: "power2.out" });
+                    gsap.to(".figure-title", { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" });
+                    gsap.to(".figure-card", { x: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power2.out" });
+                } else if (!shouldBeVisible && isFiguresVisible) {
+                    // Sortie : masquer les cartes rapidement
+                    isFiguresVisible = false;
+                    figuresAnimated = false;
+                    keyFiguresSection.style.pointerEvents = 'none';
+                    gsap.to(".figure-card", { x: 50, opacity: 0, duration: 0.2, ease: "power2.in", stagger: 0.03 });
+                    gsap.to(".figure-title", { x: 10, opacity: 0, duration: 0.2, ease: "power2.in" });
+                    gsap.to(keyFiguresSection, { opacity: 0, duration: 0.2, ease: "power2.in", onComplete: () => {
+                        keyFiguresSection.style.visibility = 'hidden';
+                    }});
+                }
+            });
+        }, {
+            threshold: [0, 0.3, 0.5, 1],
+            rootMargin: '-20% 0px -20% 0px'
+        });
+        
+        if (keyFiguresSentinel) {
+            figuresObserver.observe(keyFiguresSentinel);
+        } 
+
+        const tick = () => {
+            const elapsedTime = clock.getElapsedTime();
+            currentScrollY += (targetScrollY - currentScrollY) * inertiaFactor;
+            
+            let targetSphereX = 0;
+            let targetSphereScale = 1;
+
+            if (currentScrollY < STAGE_FIGURES_END) {
+                const progress = Math.min(1, currentScrollY / 800);
+                targetSphereX = THREE.MathUtils.lerp(0, -8, progress);
+                const introY = THREE.MathUtils.lerp(initialYPosition, 0, progress);
+                sceneGroup.position.y = introY;
+                targetSphereScale = THREE.MathUtils.lerp(2, 1.5, progress);
+                camera.position.x = THREE.MathUtils.lerp(0, -2, progress);
+                camera.rotation.y = THREE.MathUtils.lerp(0, -0.05, progress);
+            } 
+            else if (currentScrollY >= STAGE_FIGURES_END && currentScrollY < OFFSET_CARDS) {
+                const returnProgress = (currentScrollY - STAGE_FIGURES_END) / (OFFSET_CARDS - STAGE_FIGURES_END);
+                targetSphereX = THREE.MathUtils.lerp(-8, 0, returnProgress);
+                sceneGroup.position.y = 0; 
+                targetSphereScale = THREE.MathUtils.lerp(1.5, 1.2, returnProgress);
+                camera.position.x = THREE.MathUtils.lerp(-2, 0, returnProgress);
+                camera.rotation.y = THREE.MathUtils.lerp(-0.05, 0, returnProgress);
+            }
+            else {
+                targetSphereX = 0;
+                targetSphereScale = 1.2;
+                if (currentScrollY >= OFFSET_CARDS) {
+                    const introY = THREE.MathUtils.lerp(initialYPosition, 0, 1);
+                    sceneGroup.position.y = introY; 
+                }
+            }
+
+            let globalYOffset = 0;
+            if (currentScrollY > SCROLL_STAGE_TRAVEL_START) {
+                 const distanceToTravel = -pillarsYPosition; 
+                 const scrollDistance = SCROLL_STAGE_TRAVEL_END - SCROLL_STAGE_TRAVEL_START; 
+                 const progressDescend = Math.min(1, Math.max(0, (currentScrollY - SCROLL_STAGE_TRAVEL_START) / scrollDistance));
+                 const ease = progressDescend < 0.5 ? 2 * progressDescend * progressDescend : 1 - Math.pow(-2 * progressDescend + 2, 2) / 2;
+                 globalYOffset = distanceToTravel * ease;
+                 sceneGroup.position.y += globalYOffset; 
+            }
+
+            centerSphere.position.x += (targetSphereX - centerSphere.position.x) * 0.1;
+            depthSphere.position.x = centerSphere.position.x;
+            centerSphere.scale.lerp(new THREE.Vector3(targetSphereScale, targetSphereScale, targetSphereScale), 0.1);
+            depthSphere.scale.copy(centerSphere.scale);
+
+            let travelerIsMoving = false;
+            if (currentScrollY > SCROLL_STAGE_TRAVEL_START && currentScrollY < SCROLL_STAGE_TRAVEL_END) {
+                traveler.visible = true;
+                travelerIsMoving = true;
+                const travelerProg = Math.min(1, Math.max(0, (currentScrollY - SCROLL_STAGE_TRAVEL_START) / (SCROLL_STAGE_TRAVEL_END - SCROLL_STAGE_TRAVEL_START)));
+                const startVec = new THREE.Vector3(0, -5, -5); 
+                const endVec = new THREE.Vector3(0, pillarsYPosition, 0); 
+                traveler.position.lerpVectors(startVec, endVec, travelerProg);
+                const scale = 1 + Math.sin(elapsedTime * 10) * 0.2;
+                traveler.scale.setScalar(scale);
+                traveler.material.opacity = 1;
+            } else {
+                traveler.visible = false;
+                travelerIsMoving = false;
+            }
+
+            if (travelerIsMoving) {
+                trailHistory.pop(); trailHistory.unshift(traveler.position.clone());
+                for (let i = 0; i < trailLength; i++) {
+                        trailSpheres[i].visible = true;
+                        trailSpheres[i].position.copy(trailHistory[i]);
+                }
+            } else {
+                for (let i = 0; i < trailLength; i++) trailSpheres[i].visible = false;
+            }
+
+            if (currentScrollY >= SCROLL_STAGE_TRAVEL_END && currentScrollY < SCROLL_STAGE_PILLARS_REVEAL + 500) {
+                const splitDistance = 300;
+                const splitProg = Math.min(1, Math.max(0, (currentScrollY - SCROLL_STAGE_TRAVEL_END) / splitDistance));
+                if(splitProg < 1) {
+                    traveler.visible = false;
+                    const splitStartPos = new THREE.Vector3(0, pillarsYPosition, 0);
+                    splitters.forEach((splitter, i) => {
+                        splitter.visible = true;
+                        const targetPos = new THREE.Vector3(pillarTargetsX[i], pillarsYPosition, 0);
+                        splitter.position.lerpVectors(splitStartPos, targetPos, splitProg);
+                        splitter.material.opacity = 1 - splitProg; 
+                    });
+                } else { splitters.forEach(s => s.visible = false); }
+            } else {
+                 splitters.forEach(s => { s.visible = false; s.material.opacity = 1; });
+            }
+
+            if (currentScrollY > SCROLL_STAGE_PILLARS_REVEAL) {
+                const revealProg = Math.min(1, Math.max(0, (currentScrollY - SCROLL_STAGE_PILLARS_REVEAL) / 500));
+                pillarMeshes.forEach((mesh, i) => {
+                    const meshDelay = i * 0.1;
+                    const meshProg = Math.min(1, Math.max(0, (revealProg - meshDelay) * 1.5));
+                    const elastic = meshProg === 0 ? 0 : meshProg === 1 ? 1 : Math.pow(2, -10 * meshProg) * Math.sin((meshProg * 10 - 0.75) * (2 * Math.PI) / 3) + 1;
+                    if (!isDragging || draggedMesh !== mesh) {
+                        mesh.scale.setScalar(elastic);
+                        mesh.rotation.y += 0.005; mesh.rotation.x += 0.005;
+                    }
+                });
+            } else { pillarMeshes.forEach(mesh => mesh.scale.setScalar(0)); }
+
+            centerSphere.rotation.y = elapsedTime * 0.1; 
+            centerSphere.rotation.z = elapsedTime * 0.05;
+            depthSphere.rotation.y = elapsedTime * 0.1;
+            depthSphere.rotation.z = elapsedTime * 0.05;
+
+            // --- NOUVELLE LOGIQUE CARTES (OFFSET + 5.0) ---
+            let adjustedScroll = Math.max(0, currentScrollY - OFFSET_CARDS);
+            if (currentScrollY < OFFSET_CARDS) adjustedScroll = 0;
+            let scrollIndex = (adjustedScroll / scrollHeightFactor) - 1.2;
+
+            cardMeshes.forEach((mesh, i) => {
+                const relPos = (i + 3) - scrollIndex;
+                const theta = relPos * angleSpeed;
+                const radius = 9;
+
+                mesh.position.x = Math.sin(theta) * radius;
+                mesh.position.z = (Math.cos(theta) * radius) - radius + 4; 
+
+                // AJOUT DE L'OFFSET +5.0 ICI
+                let targetY = -(relPos * verticalGap);
+                
+                let targetScale = cardBaseScale;
+                let targetOpacity = 0;
+
+                // ENTRY
+                if (relPos > 0) {
+                    targetOpacity = 1 - (relPos / 4);
+                    targetOpacity = Math.max(0, Math.min(1, targetOpacity));
+                }
+                // EXIT (Simplement fade out)
+                else if (relPos <= -0.5) {
+                    targetOpacity = Math.max(0, 1 - (Math.abs(relPos + 0.5) / 2));
+                } 
+                // ZONE ACTIVE
+                else {
+                    targetOpacity = 1;
+                }
+                
+                mesh.position.y = targetY;
+                mesh.scale.setScalar(targetScale);
+                mesh.material.opacity = targetOpacity;
+                mesh.visible = targetOpacity > 0.01;
+                mesh.rotation.y = theta; 
+                mesh.rotation.x = 0.05;
+            });
+            
+            centerSphere.position.z = -5;
+            depthSphere.position.z = -5;
+
+            raycaster.setFromCamera(pointer, camera);
+            const visibleCards = cardMeshes.filter(m => m.visible);
+            const visiblePillars = pillarMeshes.filter(m => m.scale.x > 0.1); 
+            const interactiveObjects = [...visibleCards, ...visiblePillars];
+            const intersects = raycaster.intersectObjects(interactiveObjects, true); 
+
+            if (intersects.length > 0) {
+                let object = intersects[0].object;
+                while(object.parent && !object.userData.link && !object.userData.isPillar) {
+                    object = object.parent;
+                }
+                if (object.userData.link) {
+                    const worldPos = new THREE.Vector3();
+                    object.getWorldPosition(worldPos);
+                    if (worldPos.z > -5) { 
+                        if (hoveredMesh !== object) {
+                            hoveredMesh = object;
+                            document.body.style.cursor = 'pointer';
+                            gsap.to(hoveredMesh.scale, { x: cardHoverScale, y: cardHoverScale, z: cardHoverScale, duration: 0.3 });
+                        }
+                    }
+                } 
+                else if (object.userData.isPillar) {
+                    if (hoveredMesh !== object) {
+                        hoveredMesh = object;
+                        if(!isDragging) document.body.style.cursor = 'grab';
+                        gsap.to(hoveredMesh.material, { opacity: 1, duration: 0.3 });
+                    }
+                }
+            } else {
+                if (hoveredMesh) {
+                    if (hoveredMesh.userData.link) {
+                        gsap.to(hoveredMesh.scale, { x: cardBaseScale, y: cardBaseScale, z: cardBaseScale, duration: 0.3 });
+                    }
+                    if (hoveredMesh.userData.isPillar) {
+                        gsap.to(hoveredMesh.material, { opacity: 0.6, duration: 0.3 });
+                    }
+                    if(!isDragging) {
+                        hoveredMesh = null;
+                        document.body.style.cursor = 'default';
+                    }
+                }
+            }
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(tick);
+        }
+
+        tick();
+
+        window.addEventListener('resize', () => {
+            sizes.width = window.innerWidth;
+            sizes.height = window.innerHeight;
+            camera.aspect = sizes.width / sizes.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(sizes.width, sizes.height);
+        });
+
+    } catch (error) {
+        console.error("Erreur critique:", error);
+    }
+  </script>
+</body>
+</html>
